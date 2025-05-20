@@ -4,10 +4,14 @@ import com.jvt.timetracker.dto.*;
 import com.jvt.timetracker.model.User;
 import com.jvt.timetracker.model.Project;
 import com.jvt.timetracker.model.WorkLog;
+import com.jvt.timetracker.service.UserService;
 import org.springframework.stereotype.Component;
+import lombok.RequiredArgsConstructor;
 
 @Component
+@RequiredArgsConstructor
 public class ModelMapper {
+    private final UserService userService;
 
     // User Mappers
     public User toUser(UserRequestDTO dto) {
@@ -33,6 +37,10 @@ public class ModelMapper {
         Project project = new Project();
         project.setName(dto.getName());
         project.setDescription(dto.getDescription());
+        if (dto.getUserId() != null) {
+            User user = userService.getUserById(dto.getUserId());
+            project.setUser(user);
+        }
         return project;
     }
 
