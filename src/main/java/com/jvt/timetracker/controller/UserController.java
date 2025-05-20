@@ -22,15 +22,23 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<UserResponseDTO> createUser(@RequestBody UserRequestDTO userDTO) {
-        User user = modelMapper.toUser(userDTO);
-        User createdUser = userService.createUser(user);
-        return ResponseEntity.ok(modelMapper.toUserResponseDTO(createdUser));
+        try {
+            User user = modelMapper.toUser(userDTO);
+            User createdUser = userService.createUser(user);
+            return ResponseEntity.ok(modelMapper.toUserResponseDTO(createdUser));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDTO> getUserById(@PathVariable Long id) {
-        User user = userService.getUserById(id);
-        return ResponseEntity.ok(modelMapper.toUserResponseDTO(user));
+        try {
+            User user = userService.getUserById(id);
+            return ResponseEntity.ok(modelMapper.toUserResponseDTO(user));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @GetMapping
@@ -53,14 +61,22 @@ public class UserController {
     public ResponseEntity<UserResponseDTO> updateUser(
             @PathVariable Long id,
             @RequestBody UserRequestDTO userDTO) {
-        User user = modelMapper.toUser(userDTO);
-        User updatedUser = userService.updateUser(id, user);
-        return ResponseEntity.ok(modelMapper.toUserResponseDTO(updatedUser));
+        try {
+            User user = modelMapper.toUser(userDTO);
+            User updatedUser = userService.updateUser(id, user);
+            return ResponseEntity.ok(modelMapper.toUserResponseDTO(updatedUser));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        userService.deleteUser(id);
-        return ResponseEntity.ok().build();
+        try {
+            userService.deleteUser(id);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 } 

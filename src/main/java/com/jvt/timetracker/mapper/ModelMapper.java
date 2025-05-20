@@ -5,6 +5,7 @@ import com.jvt.timetracker.model.User;
 import com.jvt.timetracker.model.Project;
 import com.jvt.timetracker.model.WorkLog;
 import com.jvt.timetracker.service.UserService;
+import com.jvt.timetracker.service.ProjectService;
 import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
 
@@ -12,13 +13,14 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ModelMapper {
     private final UserService userService;
+    private final ProjectService projectService;
 
     // User Mappers
     public User toUser(UserRequestDTO dto) {
         User user = new User();
         user.setName(dto.getName());
         user.setEmail(dto.getEmail());
-        // Password will be handled by service layer
+        user.setPassword(dto.getPassword());
         return user;
     }
 
@@ -59,9 +61,22 @@ public class ModelMapper {
     // WorkLog Mappers
     public WorkLog toWorkLog(WorkLogRequestDTO dto) {
         WorkLog workLog = new WorkLog();
+        if (dto.getProjectId() != null) {
+            Project project = projectService.getProjectById(dto.getProjectId());
+            workLog.setProject(project);
+        }
         workLog.setStartTime(dto.getStartTime());
         workLog.setEndTime(dto.getEndTime());
         workLog.setDescription(dto.getDescription());
+        // durationMinutes hesapla veya 0 olarak başlat
+        if (dto.getStartTime() != null && dto.getEndTime() != null) {
+            workLog.setDurationMinutes(java.time.Duration.between(dto.getStartTime(), dto.getEndTime()).toMinutes());
+        } else {
+            workLog.setDurationMinutes(0L);
+        }
+        workLog.setDeleted(false);
+        workLog.setCreatedAt(java.time.OffsetDateTime.now());
+        workLog.setUpdatedAt(java.time.OffsetDateTime.now());
         return workLog;
     }
 

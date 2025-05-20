@@ -36,6 +36,9 @@ public class User implements Auditable {
     private String email;
     
     @Column(nullable = false)
+    private String password;
+    
+    @Column(nullable = false)
     private boolean deleted = false;
     
     @Column(nullable = false, updatable = false)
