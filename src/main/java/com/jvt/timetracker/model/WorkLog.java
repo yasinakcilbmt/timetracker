@@ -28,4 +28,7 @@ public class WorkLog {
 
     @Column(nullable = false)
     private Long durationMinutes;
+    
+    @Column(nullable = false)
+    private boolean deleted = false;
 }

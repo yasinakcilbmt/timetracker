@@ -5,6 +5,8 @@ import com.jvt.timetracker.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -28,17 +30,26 @@ public class UserService {
      * @return Kullanıcı nesnesi
      * @throws RuntimeException Eğer kullanıcı bulunamazsa
      */
-    public User getUser(Long id) {
+    public User getUserById(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
     /**
-     * Tüm kullanıcıları listeler.
+     * Tüm kullanıcıları sayfalı olarak listeler.
+     * @param pageable Sayfalama bilgileri
+     * @return Sayfalanmış kullanıcı listesi
+     */
+    public Page<User> getAllUsers(Pageable pageable) {
+        return userRepository.findByDeletedFalse(pageable);
+    }
+
+    /**
+     * Tüm kullanıcıları listeler (sayfalama olmadan).
      * @return Kullanıcı listesi
      */
     public List<User> getAllUsers() {
-        return userRepository.findAll();
+        return userRepository.findByDeletedFalse();
     }
 
     /**
@@ -48,16 +59,18 @@ public class UserService {
      * @return Güncellenmiş kullanıcı
      */
     public User updateUser(Long id, User userDetails) {
-        User user = getUser(id);
+        User user = getUserById(id);
         user.setName(userDetails.getName());
         return userRepository.save(user);
     }
 
     /**
-     * Belirtilen ID'ye sahip kullanıcıyı siler.
+     * Belirtilen ID'ye sahip kullanıcıyı soft delete yapar.
      * @param id Silinecek kullanıcının ID'si
      */
     public void deleteUser(Long id) {
-        userRepository.deleteById(id);
+        User user = getUserById(id);
+        user.setDeleted(true);
+        userRepository.save(user);
     }
 } 

@@ -25,4 +25,7 @@ public class Project {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private User user;
+
+    @Column(nullable = false)
+    private boolean deleted = false;
 }

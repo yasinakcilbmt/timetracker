@@ -19,4 +19,10 @@ public class User {
     private Long id;
     @Column(nullable = false, length = 120)
     private String name;
+    
+    @Column(nullable = false, unique = true, length = 120)
+    private String email;
+    
+    @Column(nullable = false)
+    private boolean deleted = false;
 }

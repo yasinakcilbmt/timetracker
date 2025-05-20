@@ -6,6 +6,8 @@ import com.jvt.timetracker.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -13,6 +15,7 @@ import java.util.List;
 @Service
 public class ProjectService {
     private final ProjectRepository projectRepository;
+    private final UserService userService;
 
     /**
      * Yeni bir proje oluşturur ve veritabanına kaydeder.
@@ -29,9 +32,39 @@ public class ProjectService {
      * @return Proje nesnesi
      * @throws RuntimeException Eğer proje bulunamazsa
      */
-    public Project getProject(Long id) {
+    public Project getProjectById(Long id) {
         return projectRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Project not found"));
+    }
+
+    /**
+     * Belirli bir kullanıcının projelerini sayfalı olarak listeler.
+     * @param userId Kullanıcı ID'si
+     * @param pageable Sayfalama bilgileri
+     * @return Sayfalanmış proje listesi
+     */
+    public Page<Project> getProjectsByUserId(Long userId, Pageable pageable) {
+        User user = userService.getUserById(userId);
+        return projectRepository.findByUserAndDeletedFalse(user, pageable);
+    }
+
+    /**
+     * Belirli bir kullanıcının tüm projelerini listeler.
+     * @param userId Kullanıcı ID'si
+     * @return Proje listesi
+     */
+    public List<Project> getProjectsByUserId(Long userId) {
+        User user = userService.getUserById(userId);
+        return projectRepository.findByUserAndDeletedFalse(user);
+    }
+
+    /**
+     * Tüm projeleri sayfalı olarak listeler.
+     * @param pageable Sayfalama bilgileri
+     * @return Sayfalanmış proje listesi
+     */
+    public Page<Project> getAllProjects(Pageable pageable) {
+        return projectRepository.findByDeletedFalse(pageable);
     }
 
     /**
@@ -39,16 +72,7 @@ public class ProjectService {
      * @return Proje listesi
      */
     public List<Project> getAllProjects() {
-        return projectRepository.findAll();
-    }
-
-    /**
-     * Belirli bir kullanıcıya ait projeleri listeler.
-     * @param user Kullanıcı nesnesi
-     * @return Proje listesi
-     */
-    public List<Project> getProjectsByUser(User user) {
-        return projectRepository.findByUser(user);
+        return projectRepository.findByDeletedFalse();
     }
 
     /**
@@ -58,17 +82,18 @@ public class ProjectService {
      * @return Güncellenmiş proje
      */
     public Project updateProject(Long id, Project projectDetails) {
-        Project project = getProject(id);
+        Project project = getProjectById(id);
         project.setName(projectDetails.getName());
-        project.setUser(projectDetails.getUser());
         return projectRepository.save(project);
     }
 
     /**
-     * Belirtilen ID'ye sahip projeyi siler.
+     * Belirtilen ID'ye sahip projeyi soft delete yapar.
      * @param id Silinecek projenin ID'si
      */
     public void deleteProject(Long id) {
-        projectRepository.deleteById(id);
+        Project project = getProjectById(id);
+        project.setDeleted(true);
+        projectRepository.save(project);
     }
 } 

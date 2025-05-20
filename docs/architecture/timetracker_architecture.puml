@@ -1,0 +1,119 @@
+@startuml
+' Time Tracker - Project JVT Architecture
+
+package "Model" {
+  class User {
+    +Long id
+    +String name
+    +String email
+    +String password
+    +Set<Role> roles
+    ...
+  }
+  class Project {
+    +Long id
+    +String name
+    +String description
+    +User owner
+    ...
+  }
+  class Worklog {
+    +Long id
+    +User user
+    +Project project
+    +Date startTime
+    +Date endTime
+    +String description
+    ...
+  }
+  class Role {
+    +Long id
+    +String name
+  }
+}
+
+package "DTO" {
+  class UserDTO
+  class ProjectDTO
+  class WorklogDTO
+  class ReportDTO
+}
+
+package "Repository" {
+  interface UserRepository
+  interface ProjectRepository
+  interface WorklogRepository
+}
+
+package "Service" {
+  class AuthService {
+    +register(userDTO: UserDTO): User
+    +login(email: String, password: String): String
+    +getCurrentUser(): User
+  }
+  class UserService {
+    +createUser(userDTO: UserDTO): User
+    +getUserById(id: Long): User
+    +getAllUsers(): List<User>
+    +updateUser(id: Long, userDTO: UserDTO): User
+    +deleteUser(id: Long): void
+  }
+  class ProjectService {
+    +createProject(projectDTO: ProjectDTO): Project
+    +getProjectById(id: Long): Project
+    +getAllProjects(): List<Project>
+    +getProjectsByUserId(userId: Long): List<Project>
+    +updateProject(id: Long, projectDTO: ProjectDTO): Project
+    +deleteProject(id: Long): void
+  }
+  class WorklogService {
+    +clockIn(userId: Long, projectId: Long): Worklog
+    +clockOut(userId: Long, projectId: Long): Worklog
+    +getWorklogsByUser(userId: Long): List<Worklog>
+    +getWorklogsByProject(projectId: Long): List<Worklog>
+    +getAllWorklogs(): List<Worklog>
+    +deleteWorklog(id: Long): void
+  }
+  class ReportService {
+    +getDailyReport(userId: Long, date: LocalDate): ReportDTO
+    +getWeeklyReport(userId: Long, weekOfYear: int): ReportDTO
+    +exportReportToPDF(report: ReportDTO): byte[]
+    +exportReportToExcel(report: ReportDTO): byte[]
+  }
+}
+
+package "Controller" {
+  class AuthController
+  class UserController
+  class ProjectController
+  class WorklogController
+  class ReportController
+}
+
+package "Security" {
+  class JwtTokenProvider
+  class SecurityConfig
+  class CustomUserDetailsService
+}
+
+' Relationships
+User "1" -- "*" Project : owns >
+User "1" -- "*" Worklog : logs >
+Project "1" -- "*" Worklog : contains >
+User "*" -- "*" Role : has >
+
+UserRepository <|.. UserService
+ProjectRepository <|.. ProjectService
+WorklogRepository <|.. WorklogService
+
+AuthService <.. AuthController
+UserService <.. UserController
+ProjectService <.. ProjectController
+WorklogService <.. WorklogController
+ReportService <.. ReportController
+
+JwtTokenProvider <.. AuthService
+CustomUserDetailsService <.. AuthService
+SecurityConfig <.. AuthService
+
+@enduml 
