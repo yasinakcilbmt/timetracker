@@ -1,6 +1,5 @@
 package com.jvt.timetracker.model;
 
-import com.jvt.timetracker.config.Auditable;
 import com.jvt.timetracker.config.EntityAuditListener;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -24,7 +23,7 @@ import java.time.OffsetDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class WorkLog implements Auditable {
+public class WorkLog extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -41,23 +40,6 @@ public class WorkLog implements Auditable {
     
     @Column(length = 1000)
     private String description;
-    
-    @Column(nullable = false)
-    private boolean deleted = false;
-    
-    @Column(nullable = false, updatable = false)
-    private OffsetDateTime createdAt;
-    
-    @Column(nullable = false)
-    private OffsetDateTime updatedAt;
 
-    @Override
-    public void setCreatedAt(OffsetDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
 
-    @Override
-    public void setUpdatedAt(OffsetDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
 }
