@@ -103,8 +103,3 @@ Tam liste ve model şemaları için Swagger UI’yi ziyaret edin.
 
 > 💡 **Kod Stili**: Google Java Style + Spotless (mvn spotless:apply).
 
----
-
-## Lisans
-
-Bu proje **MIT Lisansı** ile lisanslanmıştır. Ayrıntılar için `LICENSE` dosyasına bakın.
